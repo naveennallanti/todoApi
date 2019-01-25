@@ -1,8 +1,0 @@
-const express = require('express');
-const router = express.Router();
-
-router.get('/tasks',function(req,res){
-    res.render('index.html');
-})
-
-module.exports=router;

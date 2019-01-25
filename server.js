@@ -1,25 +1,33 @@
 const express = require('express');
 const bodyParser=require('body-parser');
 const path = require('path');
-const index=require('./routes/index');
-const tasks=require('./routes/tasks');
+const apiRoutes=require('./routes/apis/apiRoutes');
+const viewRoutes=require('./routes/viewRoutes/viewRoutes');
 const async=require('async');
 const MongoConnection = require('./classes/mongoConnection');
 
+var logger = require('tracer').console({
+    format: "{{timestamp}} [{{title}}] {{message}} (in {{path}}:{{line}})",
+    dateformat: "dd-mm-yyyy HH:MM:ss TT"
+});
 
 const app=express();
-let port=process.env.Port || 3000;
 
 // Setup View Engine
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs'); //specifies the engine we want to use
-app.engine('html', require('ejs').renderFile); //renders files with html extension
+app.engine('ejs', require('ejs').renderFile); //renders files with html extension
 // Set Static Folder
-app.use(express.static(__dirname, 'client')); 
+app.use(express.static(path.join(__dirname, 'client')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-app.use('/', index); //sets our home page route
-app.use('/api', tasks); //sets our api call routes
+
+
+app.use('/views', viewRoutes); //sets our home page route
+app.use('/api', apiRoutes); //sets our api call routes
+app.use('/',function (req,res) {
+    return res.redirect('/views');
+})
 //Starts our server
 
 var crashed = function (err, isLogged) {
